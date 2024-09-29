@@ -43,11 +43,15 @@ Antes de começar, você precisará ter o seguinte instalado:
 2. Configure seu banco de dados PostgreSQL e crie a tabela rust_user:
    
    ```sql
-   CREATE TABLE rust_user (
-      id SERIAL PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      password VARCHAR(255) NOT NULL
-   );
+   CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+   CREATE TABLE
+       IF NOT EXISTS rust_user (
+           id UUID PRIMARY KEY NOT NULL DEFAULT (uuid_generate_v4()),
+           name VARCHAR(255) NOT NULL UNIQUE,
+           password VARCHAR(255) NOT NULL
+       );
+
 
 3. Compile e execute o servidor:
    
