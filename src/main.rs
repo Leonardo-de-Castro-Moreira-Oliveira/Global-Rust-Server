@@ -9,6 +9,7 @@ use dotenv::dotenv;
 use sqlx::{Pool, Postgres};
 use std::io::Result as IoResult;
 
+// Estrutura para o banco de dados do Actix.
 pub struct AppState {
     db: Pool<Postgres>,
 }

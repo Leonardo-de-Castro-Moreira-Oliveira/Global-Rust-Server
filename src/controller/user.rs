@@ -5,27 +5,27 @@ use actix_web::{
     Responder,
 };
 
-#[get("/all")]
+#[get("/all")] // Rota GET para obter todos os usuários.
 pub async fn get_all_users(data: Data<AppState>) -> impl Responder {
     crate::service::user::get_all_users(data).await
 }
 
-#[get("/one/{id}")]
+#[get("/one/{id}")] // Rota GET para obter uma pesquisa de usuário via Uuid.
 pub async fn get_one_user(path: Path<String>, data: Data<AppState>) -> impl Responder {
     crate::service::user::find_one_user(path, data).await
 }
 
-#[get("/some/{name}")]
+#[get("/some/{name}")] // Rota GET para obter uma pesquisa de assemelhação de usuários via name.
 pub async fn get_some_users(path: Path<String>, data: Data<AppState>) -> impl Responder {
     crate::service::user::find_some_users(path, data).await
 }
 
-#[post("/manage")]
+#[post("/manage")] // Rota POST para adicionar usuário via JSON UserModel no body.
 pub async fn post_one_user(body: Json<UserModel>, data: Data<AppState>) -> impl Responder {
     crate::service::user::add_one_user(body, data).await
 }
 
-#[delete("/manage")]
+#[delete("/manage")] // Rota POST para remover usuário via autenticação em JSON UserSchema em body.
 pub async fn delete_one_user(body: Json<UserSchema>, data: Data<AppState>) -> impl Responder {
     crate::service::user::delete_one_user(body, data).await
 }

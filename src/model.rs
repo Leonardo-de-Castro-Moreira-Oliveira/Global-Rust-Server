@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize)]
 pub struct UserModel {
     pub name: String,
     pub password: String,
