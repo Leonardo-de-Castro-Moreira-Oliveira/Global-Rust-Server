@@ -1,4 +1,4 @@
-use crate::{model::UserModel, schema::UserSchema, AppState};
+use crate::{model, schema, AppState};
 use actix_web::{
     delete, get, post,
     web::{Data, Json, Path},
@@ -21,11 +21,11 @@ pub async fn get_some_users(path: Path<String>, data: Data<AppState>) -> impl Re
 }
 
 #[post("/manage")] // Rota POST para adicionar usuário via JSON UserModel no body.
-pub async fn post_one_user(body: Json<UserModel>, data: Data<AppState>) -> impl Responder {
+pub async fn post_one_user(body: Json<model::User>, data: Data<AppState>) -> impl Responder {
     crate::service::user::add_one_user(body, data).await
 }
 
 #[delete("/manage")] // Rota POST para remover usuário via autenticação em JSON UserSchema em body.
-pub async fn delete_one_user(body: Json<UserSchema>, data: Data<AppState>) -> impl Responder {
+pub async fn delete_one_user(body: Json<schema::User>, data: Data<AppState>) -> impl Responder {
     crate::service::user::delete_one_user(body, data).await
 }

@@ -4,10 +4,10 @@ use sqlx::prelude::FromRow;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, FromRow)]
-pub struct MessageSchema {
+pub struct Message {
     pub id: Uuid,
-    pub likes: u32,
-    pub owner: Uuid,
+    pub likes: i32,
+    pub user_id: Uuid,
     pub content: String,
     pub sended_at: DateTime<Utc>,
 }
