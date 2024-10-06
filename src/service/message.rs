@@ -21,10 +21,11 @@ pub async fn get_all_messages(data: Data<crate::AppState>) -> HttpResponse {
 
 // Método utilizado no escopo principal para obter o escopo "tech".
 pub fn get_scope() -> Scope {
-    // Logs de sucesso.
+    scope("/tech").service(crate::controller::message::get_all_messages) // Obter todos as mensagens    GET ("api/tech/all")
+}
+
+// Logs da rota.
+pub fn logs() {
     println!("\n# Loading tech-connect route...");
     println!("@ROUTE('api/tech/all')                GET : Return all messages.");
-
-    // Retornando o escopo.
-    scope("/tech").service(crate::controller::message::get_all_messages) // Obter todos as mensagens    GET ("api/tech/all")
 }

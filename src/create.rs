@@ -9,11 +9,11 @@ use crate::{service, AppState};
 pub fn venvs(key: &str) -> String {
     match var(key) {
         Ok(value) => {
-            println!("@ENV {} loaded successfully.", key); // Propagando um log de suceso.
+            println!("@ENV('{}') loaded successfully.", key); // Propagando um log de suceso.
             value // Retornando a variável.
         }
         Err(_) => {
-            println!("@ENV {} must be set!", key); // Propagando um log de erro.
+            println!("@ENV('{}') must be set!", key); // Propagando um log de erro.
             exit(1) // Finalizando a execução.
         }
     }
@@ -23,17 +23,17 @@ pub fn venvs(key: &str) -> String {
 pub fn venv<T: FromStr>(key: &str) -> T {
     match var(key) {
         Ok(var_value) => {
-            println!("@ENV {} loaded successfully.", key); // Propagando um log de sucesso.
+            println!("@ENV('{}') loaded successfully.", key); // Propagando um log de sucesso.
             match var_value.trim().parse::<T>() {
                 Ok(value) => value, // Retornando a variável.
                 Err(_) => {
-                    println!("@ENV {} cannot be parsed to the expected type!", key); // Propagando um log de erro.
+                    println!("@ENV('{}') cannot be parsed to the expected type!", key); // Propagando um log de erro.
                     exit(1) // Finalizando a execução.
                 }
             }
         }
         Err(_) => {
-            println!("@ENV {} must be set!", key); // Propagando um log de erro.
+            println!("@ENV('{}') must be set!", key); // Propagando um log de erro.
             exit(1) // Finalizando a execução.
         }
     }

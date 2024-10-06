@@ -147,7 +147,16 @@ pub async fn delete_one_user(
 
 // Método utilizado no escopo principal para obter o escopo "user".
 pub fn get_scope() -> Scope {
-    // Logs de sucesso.
+    scope("/user")
+        .service(crate::controller::user::get_all_users) //   Obter todos os usuários.  GET     ("api/user/all")
+        .service(crate::controller::user::get_some_users) //  Pesquisa alguns usuários. GET     ("api/user/some/{name}")
+        .service(crate::controller::user::get_one_user) //    Pesquisa um usuário.      GET     ("api/user/one/{id}")
+        .service(crate::controller::user::post_one_user) //   Adiciona um usuário.      POST    ("api/user/manage")
+        .service(crate::controller::user::delete_one_user) // Deleta um usuário.        DELETE  ("api/user/manage")
+}
+
+// Logs da rota.
+pub fn logs() {
     println!("\n# Loading user route...");
     println!("@ROUTE('api/user/all')                GET     : Return all users. ");
     println!("@ROUTE('api/user/some/{{name}}')        GET     : Return some users by name.");
@@ -156,12 +165,4 @@ pub fn get_scope() -> Scope {
     println!(
         "@ROUTE('api/user/manage')             DELETE  : Delete one user by id, name and password."
     );
-
-    // Retornando escopo.
-    scope("/user")
-        .service(crate::controller::user::get_all_users) //   Obter todos os usuários.  GET     ("api/user/all")
-        .service(crate::controller::user::get_some_users) //  Pesquisa alguns usuários. GET     ("api/user/some/{name}")
-        .service(crate::controller::user::get_one_user) //    Pesquisa um usuário.      GET     ("api/user/one/{id}")
-        .service(crate::controller::user::post_one_user) //   Adiciona um usuário.      POST    ("api/user/manage")
-        .service(crate::controller::user::delete_one_user) // Deleta um usuário.        DELETE  ("api/user/manage")
 }

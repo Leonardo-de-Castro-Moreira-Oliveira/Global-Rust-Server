@@ -34,5 +34,8 @@ async fn main() -> IoResult<()> {
     println!("$ Server started successfully.");
     println!("$ Access http://{} to verify the server.", addrs);
 
+    service::user::logs();
+    service::message::logs();
+
     return server.await;
 }
