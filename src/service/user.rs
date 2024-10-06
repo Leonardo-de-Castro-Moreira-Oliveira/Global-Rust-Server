@@ -24,7 +24,7 @@ pub async fn get_all_users(data: Data<crate::AppState>) -> HttpResponse {
 // Método para pesquisar um usuário a partir de seu id
 // e retornando uma resposta HTTP contendo o usuário.
 // O erro acontece se não for encontrado ou se o uuid for inválido.
-pub async fn find_one_user(path: Path<String>, data: Data<crate::AppState>) -> HttpResponse {
+pub async fn find_user_by_id(path: Path<String>, data: Data<crate::AppState>) -> HttpResponse {
     // Transferindo a variavel de url em Uuid para a pesquisa.
     match Uuid::parse_str(&path) {
         Ok(uuid) => match query_as!(schema::User, "SELECT * FROM rust_user WHERE id = $1", uuid)
@@ -35,7 +35,7 @@ pub async fn find_one_user(path: Path<String>, data: Data<crate::AppState>) -> H
             Err(_) => HttpResponse::NotFound().json(response::ServerError::new(
                 "not found",
                 "This UUID doesn't exist in the database!",
-            )), // Retornando o erro no qual indica que o usuário correspondente não foi encontrado,
+            )), // Retornando o erro no qual indica que o usuário correspondente não foi encontrado.
         },
         Err(_) => HttpResponse::BadRequest().json(response::ServerError::new(
             "bad request",
@@ -48,7 +48,7 @@ pub async fn find_one_user(path: Path<String>, data: Data<crate::AppState>) -> H
 // a variavel determinada na url e retornando uma resposta HTTP contendo
 // uma lista dos usuários encontrados.
 // O erro acontece caso não seja encontrado nenhum usuário.
-pub async fn find_some_users(path: Path<String>, data: Data<crate::AppState>) -> HttpResponse {
+pub async fn find_users_by_name(path: Path<String>, data: Data<crate::AppState>) -> HttpResponse {
     let search_pattern = format!("%{}%", path.to_string()); // Formatando o pattern para a pesquisa.
 
     match query_as!(
@@ -82,7 +82,10 @@ pub async fn find_some_users(path: Path<String>, data: Data<crate::AppState>) ->
 // resposta HTTP contendo o usuário adicionado.
 // O error ocorre quando o nome está vazio ou a
 // senha contem menos que 8 caracteres.
-pub async fn add_one_user(body: Json<model::User>, data: Data<crate::AppState>) -> HttpResponse {
+pub async fn add_user_by_model(
+    body: Json<model::User>,
+    data: Data<crate::AppState>,
+) -> HttpResponse {
     // Validação do tamanho do nome e da senha.
     if body.name.is_empty() || body.password.len() < 8 {
         return HttpResponse::NotAcceptable().json(response::ServerError::new(
@@ -111,7 +114,7 @@ pub async fn add_one_user(body: Json<model::User>, data: Data<crate::AppState>) 
 // via id, nome e senha retornando uma resposta HTTP contendo
 // o resultado da pesquisa.
 // O erro é retornado quando nenhuma linha é afetada.
-pub async fn delete_one_user(
+pub async fn delete_user_by_schema(
     body: Json<schema::User>,
     data: Data<crate::AppState>,
 ) -> HttpResponse {
