@@ -1,8 +1,8 @@
 use actix_web::{
-    web::{scope, Data, Path},
+    web::{scope, Data, Json, Path},
     HttpResponse, Scope,
 };
-use sqlx::query_as;
+use sqlx::{query, query_as};
 use uuid::Uuid;
 
 use crate::{model, response, schema};
@@ -107,7 +107,7 @@ pub async fn get_messages_from_user_id(
                 .fetch_optional(&data.db)
                 .await
             {
-                Ok(Some(_user)) => {
+                Ok(Some(_)) => {
                     // O usuário existe, agora buscar as mensagens
                     match query_as!(
                         schema::Message,
@@ -152,13 +152,66 @@ pub async fn get_messages_from_user_id(
     }
 }
 
+// Método para adicionar mensagem via autênticação por model::Message
+// retornando uma resposta HTTP contendo a mensagem adicionada.
+// O erro ocorre quando a autênticação falha.
+pub async fn add_message_by_model(
+    body: Json<model::Message>,
+    data: Data<crate::AppState>,
+) -> HttpResponse {
+    // Autenticando o usuário proprietário.
+    match query!(
+        "SELECT * FROM rust_user WHERE id = $1 AND password = $2",
+        body.user_id,
+        body.password, // Considere usar um hash seguro para senhas
+    )
+    .fetch_optional(&data.db)
+    .await
+    {
+        Ok(Some(_)) => {
+            // Inserindo a nova mensagem
+            match query_as!(
+                schema::Message,
+                "INSERT INTO messages (user_id, content) VALUES ($1, $2) RETURNING *",
+                body.user_id,
+                body.content
+            )
+            .fetch_one(&data.db)
+            .await
+            {
+                Ok(message) => {
+                    // Mensagem criada com sucesso, retornando o status 201 Created
+                    HttpResponse::Created().json(response::Success::new("created", message))
+                }
+                Err(err) => {
+                    // Erro inesperado na inserção
+                    HttpResponse::InternalServerError()
+                        .json(response::ServerError::from_sqlx_error(err))
+                }
+            }
+        }
+        Ok(None) => {
+            // Usuário não encontrado ou senha inválida, retornando erro de autenticação
+            HttpResponse::Unauthorized().json(response::ServerError::new(
+                "unauthorized",
+                "This user doesn't exist or the password is invalid!",
+            ))
+        }
+        Err(err) => {
+            // Erro inesperado do sqlx ao tentar buscar o usuário
+            HttpResponse::InternalServerError().json(response::ServerError::from_sqlx_error(err))
+        }
+    }
+}
+
 // Método utilizado no escopo principal para obter o escopo "tech".
 pub fn get_scope() -> Scope {
     scope("/tech")
-        .service(crate::controller::message::get_all_messages) // Obter todos as mensagens.     GET ("api/tech/all")
-        .service(crate::controller::message::get_one_message) // Obter uma única mensagem.      GET ("api/tech/one/{id}")
-        .service(crate::controller::message::get_some_messages) // Obter algumas mensagens.     GET ("api/tech/some/{content}")
-        .service(crate::controller::message::get_messages_from_user) // Obter do usuário.       GET ("api/tech/from/{user_id}")
+        .service(crate::controller::message::get_all_messages) // Obter todos as mensagens.     GET     ("api/tech/all")
+        .service(crate::controller::message::get_one_message) // Obter uma única mensagem.      GET     ("api/tech/one/{id}")
+        .service(crate::controller::message::get_some_messages) // Obter algumas mensagens.     GET     ("api/tech/some/{content}")
+        .service(crate::controller::message::get_messages_from_user) // Obter do usuário.       GET     ("api/tech/from/{user_id}")
+        .service(crate::controller::message::post_message) // Adicionar uma mensagem.           POST    ("api/tech/manage")
 }
 
 // Logs da rota.
@@ -168,4 +221,5 @@ pub fn logs() {
     println!("@ROUTE('api/tech/one/{{id}}')           GET     : Return one message by id.");
     println!("@ROUTE('api/tech/some/{{content}}')     GET     : Return some messages by content.");
     println!("@ROUTE('api/tech/from/{{user_id}}')     GET     : Return some messages by user_id.");
+    println!("@ROUTE('api/tech/from/manage')        POST    : Add message by Model and return.");
 }

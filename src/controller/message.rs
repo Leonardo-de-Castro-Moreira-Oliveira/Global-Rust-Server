@@ -1,8 +1,10 @@
 use actix_web::{
-    get,
-    web::{Data, Path},
+    get, post,
+    web::{Data, Json, Path},
     Responder,
 };
+
+use crate::model;
 
 #[get("/all")] // Rota GET para obter todas as mensagens.
 pub async fn get_all_messages(data: Data<crate::AppState>) -> impl Responder {
@@ -25,4 +27,12 @@ pub async fn get_messages_from_user(
     data: Data<crate::AppState>,
 ) -> impl Responder {
     crate::service::message::get_messages_from_user_id(path, data).await
+}
+
+#[post("/manage")] // Rota POST para asdicionar uma mensagem com autênticação.
+pub async fn post_message(
+    body: Json<model::Message>,
+    data: Data<crate::AppState>,
+) -> impl Responder {
+    crate::service::message::add_message_by_model(body, data).await
 }
